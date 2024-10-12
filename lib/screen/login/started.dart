@@ -7,7 +7,7 @@ class StartedScreen extends StatelessWidget {
       body: Center(
         child: Container(
           // Tambahkan Container di sini
-          padding: EdgeInsets.symmetric(horizontal: 20), // Atur padding di sini
+          padding: EdgeInsets.symmetric(horizontal: 40), // Atur padding di sini
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -20,7 +20,7 @@ class StartedScreen extends StatelessWidget {
               Text(
                 'The genetics material reader app',
                 style: TextStyle(
-                  fontSize: 34,
+                  fontSize: 30,
                   fontWeight: FontWeight.w700,
                 ),
               ),
