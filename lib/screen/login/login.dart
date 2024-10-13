@@ -13,6 +13,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isUsernameValid = true;
   bool isPasswordValid = true;
 
+  bool _isPasswordVisible = false;
+
   // Fungsi untuk mengembalikan InputDecoration dengan border hijau atau merah berdasarkan validasi
   InputDecoration _inputDecoration(String labelText, bool isValid) {
     return InputDecoration(
@@ -80,8 +82,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Password field dengan validasi
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration: _inputDecoration('Password', isPasswordValid),
+                    obscureText: !_isPasswordVisible,
+                    decoration:
+                        _inputDecoration('Password', isPasswordValid).copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    // obscureText: true,
+                    // decoration: _inputDecoration('Password', isPasswordValid),
                     style: TextStyle(color: Colors.black), // Warna teks input
                   ),
 
@@ -123,14 +142,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text('Login'),
                   ),
 
-                  SizedBox(height: 10),
+                  SizedBox(height: 20),
 
-                  // Forgot Password
-                  TextButton(
-                    onPressed: () {
-                      // Aksi ketika klik reset password
-                    },
-                    child: Text('Forgotten your password? Reset Password'),
+                  // fprgot password
+                  Align(
+                    alignment: Alignment.center,
+                    child: TextButton(
+                      onPressed: () {
+                        // aksi klik passeord
+                        Navigator.pushNamed(context, '/reset-password');
+                      },
+                      child: Text(
+                        'Forgotten your password? Reset Password',
+                        style: TextStyle(
+                          color: Color(0xFF7DBD07),
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
                   ),
 
                   SizedBox(height: 50), // Memberikan jarak dari bawah
