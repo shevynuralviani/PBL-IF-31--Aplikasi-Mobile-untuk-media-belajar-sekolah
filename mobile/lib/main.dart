@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:genetika_app/screen/login/login.dart';
-import 'package:genetika_app/screen/login/started.dart';
-import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
-
+import 'screen/login/login.dart';
+import 'screen/login/started.dart';
+import 'screen/siswa/siswa_homepage.dart';
 
 void main() {
   runApp(const MyApp());
