@@ -38,6 +38,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isStarSelected = false; // Track star icon state
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,63 +104,82 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               )
                             else
-                              Text((9 + ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'].indexOf(day)).toString()),
+                              Text((13 + ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'].indexOf(day)).toString()),
                           ],
                         ),
                       )
                       .toList(),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               // Reading Progress Section
               const Text(
                 'Lanjutkan Membaca',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7BBB07).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 65,
-                      height: 80,
-                      color: const Color(0xFFB4D924),
+              Stack(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7BBB07).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        const Text(
-                          'Enzim Dan Metabolisme',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        Container(
+                          width: 65,
+                          height: 80,
+                          color: const Color(0xFFB4D924),
                         ),
-                        const Text('Biology, Bab 1'),
-                        const SizedBox(height: 5),
+                        const SizedBox(width: 20),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Page 11 from 50 (40%)'),
-                            const SizedBox(height: 10),
-                            Container(
-                              width: 150, // Adjust width as needed
-                              child: LinearProgressIndicator(
-                                value: 0.4,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7BBB07)),
-                                minHeight: 5,
-                              ),
+                            const Text(
+                              'Enzim Dan Metabolisme',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const Text('Biology, Bab 1'),
+                            const SizedBox(height: 5),
+                            Column(
+                              children: [
+                                const Text('Page 11 from 50 (40%)'),
+                                const SizedBox(height: 10),
+                                Container(
+                                  width: 150, // Adjust width as needed
+                                  child: LinearProgressIndicator(
+                                    value: 0.4,
+                                    backgroundColor: Colors.grey[300],
+                                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7BBB07)),
+                                    minHeight: 5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  // Icon bintang di pojok kanan atas
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isStarSelected = !_isStarSelected; // Toggle state
+                        });
+                      },
+                      child: Icon(
+                        Icons.star,
+                        color: _isStarSelected ? const Color(0xFF7BBB07) : Colors.grey,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

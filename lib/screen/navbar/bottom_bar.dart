@@ -1,62 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-class BottomBar extends StatefulWidget {
-final Function(int) onTap; // Fungsi callback untuk mengirim index yang dipilih
-  final int selectedIndex;
+void main() {
+  runApp(BottomBar());
+}
 
-  const BottomBar({
-    super.key,
-    required this.onTap,
-    required this.selectedIndex,
-  });
+class BottomBar extends StatefulWidget {
+  static const title = 'salomon_bottom_bar';
+
+  const BottomBar({super.key});
 
   @override
-  State<BottomBar> createState() => _BottomBarState();
+  _BottomBarState createState() => _BottomBarState();
 }
 
 class _BottomBarState extends State<BottomBar> {
-  int _selectedIndex = 0;
+  var _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Google Bottom Bar')),
-      body: Center(
-        child: _navBarItems[_selectedIndex].title,
+    return MaterialApp(
+      title: BottomBar.title,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      bottomNavigationBar: SalomonBottomBar(
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xff6200ee),
-          unselectedItemColor: const Color(0xff757575),
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: _navBarItems),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(BottomBar.title),
+        ),
+        bottomNavigationBar: SalomonBottomBar(
+          currentIndex: _currentIndex,
+          onTap: (i) => setState(() => _currentIndex = i),
+          items: [
+            /// Home
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.home),
+              title: const Text("Home"),
+              selectedColor: Color(0xFF7BBB07), // Warna hijau saat dipilih
+            ),
+
+            /// Book
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.book),
+              title: const Text("Materi"),
+              selectedColor: Color(0xFF7BBB07), // Warna hijau saat dipilih
+            ),
+
+            /// Video
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.video_library),
+              title: const Text("Video"),
+              selectedColor: Color(0xFF7BBB07), // Warna hijau saat dipilih
+            ),
+
+            /// Star
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.star),
+              title: const Text("Favorit"),
+              selectedColor: Color(0xFF7BBB07), // Warna hijau saat dipilih
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
-
-final _navBarItems = [
-  SalomonBottomBarItem(
-    icon: const Icon(Icons.home),
-    title: const Text("Home"),
-    selectedColor: Colors.purple,
-  ),
-  SalomonBottomBarItem(
-    icon: const Icon(Icons.favorite_border),
-    title: const Text("Likes"),
-    selectedColor: Colors.pink,
-  ),
-  SalomonBottomBarItem(
-    icon: const Icon(Icons.search),
-    title: const Text("Search"),
-    selectedColor: Colors.orange,
-  ),
-  SalomonBottomBarItem(
-    icon: const Icon(Icons.person),
-    title: const Text("Profile"),
-    selectedColor: Colors.teal,
-  ),
-];
