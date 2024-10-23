@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:genetika_app/screen/siswa/materi.dart';
 import 'screen/login/login.dart';
 import 'screen/login/started.dart';
 import 'screen/siswa/siswa_homepage.dart';
+import 'screen/navbar/custom_appbar.dart';
+import 'screen/navbar/bottom_bar.dart';
+import 'screen/siswa/materi.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) =>
             LoginScreen(), // Define the route for the login page
         '/home': (context) => const HomeSiswa(),
+        '/materi': (context) => const MateriPage(),
       },
     );
   }

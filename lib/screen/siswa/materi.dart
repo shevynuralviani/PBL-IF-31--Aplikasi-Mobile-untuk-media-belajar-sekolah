@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
 
 class MateriPage extends StatefulWidget {
   const MateriPage({super.key});
@@ -10,13 +11,25 @@ class MateriPage extends StatefulWidget {
 class _MateriPageState extends State<MateriPage> {
   // List to keep track of which items are favorited
   List<bool> isFavorited = [false, false, false, false];
+  
+  int _selectedIndex = 1; // Track selected bottom nav item
+
+  // List halaman yang akan ditampilkan
+  final List<Widget> _pages = [
+    const HomeSiswa(),
+    const MateriPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Materi Pelajaran'),
-      ),
+      appBar: AppBar(),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
