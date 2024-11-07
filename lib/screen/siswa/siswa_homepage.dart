@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:genetika_app/screen/navbar/custom_appbar.dart';
 import 'package:genetika_app/screen/navbar/bottom_bar.dart';
 import 'package:genetika_app/screen/siswa/materi.dart';
+import 'package:genetika_app/screen/siswa/videopage.dart';
+import 'package:genetika_app/screen/siswa/favoritpage.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -25,7 +28,9 @@ class _HomeSiswaState extends State<HomeSiswa> {
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
     const MyHomePage(),
-    const MateriPage(), // Menambahkan MateriPage di sini
+    const MateriPage(),
+    VideoPage(),
+    FavoritePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -66,6 +71,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _isStarSelected = false; // Track star icon state
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
@@ -105,36 +112,43 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const SizedBox(height: 20),
             // Calendar section
-            const Text(
-              'OKTOBER, 2024',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
             Container(
-              padding: const EdgeInsets.all(16),
-              color: const Color(0xFFB4D924),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN']
-                    .map(
-                      (day) => Column(
-                        children: [
-                          Text(day),
-                          const SizedBox(height: 5),
-                          if (day == 'SAB') // Highlight the 14th (Saturday)
-                            const CircleAvatar(
-                              radius: 15,
-                              backgroundColor: Color(0xFF000000), // Changed to #7BBB07
-                              child: Text(
-                                '14',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          else
-                            Text((13 + ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'].indexOf(day)).toString()),
-                        ],
-                      ),
-                    )
-                    .toList(),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFB4D924), // Background color of the calendar
+                  borderRadius: BorderRadius.circular(15), // Adding border radius
+                ),              
+                child: TableCalendar(
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                },
+                calendarFormat: CalendarFormat.week,
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                ),
+                calendarStyle: const CalendarStyle(
+                defaultTextStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold, 
+                ),
+                todayDecoration: BoxDecoration(
+                color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                  todayTextStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -173,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               const Text('Page 11 from 50 (40%)'),
                               const SizedBox(height: 10),
                               Container(
-                                width: 150, // Adjust width as needed
+                                width: 150,
                                 child: LinearProgressIndicator(
                                   value: 0.4,
                                   backgroundColor: Colors.grey[300],
@@ -195,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        _isStarSelected = !_isStarSelected; // Toggle state
+                        _isStarSelected = !_isStarSelected;
                       });
                     },
                     child: Icon(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genetika_app/screen/password/forget_password.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -12,7 +13,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isUsernameValid = true;
   bool isPasswordValid = true;
-
   bool _isPasswordVisible = false;
 
   // Fungsi untuk mengembalikan InputDecoration dengan border hijau atau merah berdasarkan validasi
@@ -39,28 +39,22 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Pastikan diatur ke true atau dihapus
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        // SafeArea untuk menghindari area sistem
         child: SingleChildScrollView(
-          // Menambahkan SingleChildScrollView
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
-                // Tidak perlu mainAxisAlignment.center karena SingleChildScrollView sudah mengatur scroll
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(height: 50), // Memberikan jarak dari atas
-                  // Logo sekolah
+                  SizedBox(height: 50),
                   Image.asset(
                     'assets/images/logo-sekolah.png',
                     height: 280,
                     width: 280,
                   ),
-
                   SizedBox(height: 15),
-
                   Text(
                     'SMAIT ULIL ALBAB BATAM',
                     style: TextStyle(
@@ -74,17 +68,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _usernameController,
                     decoration: _inputDecoration('Username', isUsernameValid),
-                    style: TextStyle(color: Colors.black), // Warna teks input
+                    style: TextStyle(color: Colors.black),
                   ),
-
                   SizedBox(height: 20),
 
                   // Password field dengan validasi
                   TextField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
-                    decoration:
-                        _inputDecoration('Password', isPasswordValid).copyWith(
+                    decoration: _inputDecoration('Password', isPasswordValid)
+                        .copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
@@ -99,9 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                     ),
-                    // obscureText: true,
-                    // decoration: _inputDecoration('Password', isPasswordValid),
-                    style: TextStyle(color: Colors.black), // Warna teks input
+                    style: TextStyle(color: Colors.black),
                   ),
 
                   SizedBox(height: 10),
@@ -144,13 +135,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: 20),
 
-                  // fprgot password
+                  // Forgot Password Button
                   Align(
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () {
-                        // aksi klik passeord
-                        Navigator.pushNamed(context, '/reset-password');
+                        // Navigasi ke halaman Forget Password menggunakan MaterialPageRoute
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ForgetPasswordPage()),
+                        );
                       },
                       child: Text(
                         'Forgotten your password? Reset Password',
@@ -162,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 50), // Memberikan jarak dari bawah
+                  SizedBox(height: 50),
                 ],
               ),
             ),

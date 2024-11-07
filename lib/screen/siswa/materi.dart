@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
+import 'package:genetika_app/screen/siswa/videopage.dart';
+
 
 class MateriPage extends StatefulWidget {
   const MateriPage({super.key});
@@ -18,6 +20,7 @@ class _MateriPageState extends State<MateriPage> {
   final List<Widget> _pages = [
     const HomeSiswa(),
     const MateriPage(),
+    VideoPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -29,13 +32,16 @@ class _MateriPageState extends State<MateriPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+      title: Text('Materi Pelajaran'),
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0), // Padding added to the whole body
             child: Column(
               children: [
+                const SizedBox(height: 20),
                 buildFavoriteItem(
                   title: 'Enzim Dan Metabolisme',
                   subtitle: 'Biology, Bab 1',
