@@ -6,13 +6,13 @@ class StartedScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          // Tambahkan Container di sini
-          padding: EdgeInsets.symmetric(horizontal: 40), // Atur padding di sini
+          // Added padding around the content
+          padding: EdgeInsets.symmetric(horizontal: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/get_start.png', // Ganti dengan path gambar Anda
+                'assets/images/get_start.png', // Path to your image
                 height: 280,
                 width: 280,
               ),
@@ -33,14 +33,13 @@ class StartedScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(
-                      context, '/login'); // Navigasi ke halaman login
+                      context, '/login'); // Navigating to login screen
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF7DBD07), // Use backgroundColor
+                  backgroundColor: Color(0xFF7DBD07), // Set button color
                   padding: EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 15), // Tambahkan padding di sini
-                  foregroundColor: Colors.black, // Set text color to black
+                      horizontal: 40, vertical: 15), // Button padding
+                  foregroundColor: Colors.black, // Text color of button
                 ),
                 child: Text('Get started'),
               )

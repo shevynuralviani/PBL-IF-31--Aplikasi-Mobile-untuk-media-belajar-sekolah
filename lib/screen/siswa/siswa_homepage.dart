@@ -2,17 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:genetika_app/screen/navbar/custom_appbar.dart';
 import 'package:genetika_app/screen/navbar/bottom_bar.dart';
 import 'package:genetika_app/screen/siswa/materi.dart';
 import 'package:genetika_app/screen/siswa/videopage.dart';
 import 'package:genetika_app/screen/siswa/favoritpage.dart';
 
-void main() {
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-  );
-  runApp(const HomeSiswa());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Periksa status login saat aplikasi dijalankan
+  bool isLoggedIn = await checkLoginStatus();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'School App',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: isLoggedIn
+          ? HomeSiswa()
+          : LoginPage(), // Arahkan ke halaman login jika belum login
+    );
+  }
+}
+
+// Halaman Login (Jika pengguna belum login)
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Login")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () async {
+            // Simulasi login berhasil
+            await saveLoginStatus(true); // Simpan status login
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeSiswa()),
+            );
+          },
+          child: const Text("Login"),
+        ),
+      ),
+    );
+  }
+}
+
+// Fungsi untuk memeriksa status login
+Future<bool> checkLoginStatus() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isLoggedIn') ??
+      false; // Default false jika tidak ada data
+}
+
+// Fungsi untuk menyimpan status login
+Future<void> saveLoginStatus(bool isLoggedIn) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isLoggedIn', isLoggedIn);
 }
 
 class HomeSiswa extends StatefulWidget {
@@ -47,15 +108,38 @@ class _HomeSiswaState extends State<HomeSiswa> {
         primarySwatch: Colors.green,
       ),
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: MyCustomAppBar(),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-        bottomNavigationBar: BottomBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+      home: WillPopScope(
+        onWillPop: () async {
+          bool shouldExit = await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Keluar Aplikasi"),
+              content:
+                  const Text("Apakah Anda yakin ingin keluar dari aplikasi?"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("Tidak"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text("Ya"),
+                ),
+              ],
+            ),
+          );
+          return shouldExit ?? false;
+        },
+        child: Scaffold(
+          appBar: MyCustomAppBar(),
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
+          ),
+          bottomNavigationBar: BottomBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+          ),
         ),
       ),
     );
@@ -114,10 +198,11 @@ class _MyHomePageState extends State<MyHomePage> {
             // Calendar section
             Container(
               decoration: BoxDecoration(
-                  color: const Color(0xFFB4D924), // Background color of the calendar
-                  borderRadius: BorderRadius.circular(15), // Adding border radius
-                ),              
-                child: TableCalendar(
+                color:
+                    const Color(0xFFB4D924), // Background color of the calendar
+                borderRadius: BorderRadius.circular(15), // Adding border radius
+              ),
+              child: TableCalendar(
                 firstDay: DateTime.utc(2020, 1, 1),
                 lastDay: DateTime.utc(2030, 12, 31),
                 focusedDay: _focusedDay,
@@ -136,14 +221,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   titleCentered: true,
                 ),
                 calendarStyle: const CalendarStyle(
-                defaultTextStyle: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold, 
-                ),
-                todayDecoration: BoxDecoration(
-                color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
+                  defaultTextStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
                   todayTextStyle: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -178,7 +263,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           const Text(
                             'Enzim Dan Metabolisme',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const Text('Biology, Bab 1'),
                           const SizedBox(height: 5),
@@ -191,7 +277,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 child: LinearProgressIndicator(
                                   value: 0.4,
                                   backgroundColor: Colors.grey[300],
-                                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7BBB07)),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                          Color(0xFF7BBB07)),
                                   minHeight: 5,
                                 ),
                               ),
@@ -214,7 +302,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     child: Icon(
                       Icons.star,
-                      color: _isStarSelected ? const Color(0xFF7BBB07) : Colors.grey,
+                      color: _isStarSelected
+                          ? const Color(0xFF7BBB07)
+                          : Colors.grey,
                       size: 30,
                     ),
                   ),

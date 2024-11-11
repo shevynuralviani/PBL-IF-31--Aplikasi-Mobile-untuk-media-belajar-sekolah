@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:genetika_app/screen/guru/guru_homepage.dart'; // Halaman untuk guru
-import 'package:genetika_app/screen/siswa/siswa_homepage.dart'; // Halaman untuk siswa
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:genetika_app/screen/guru/guru_homepage.dart';
+import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
 import 'package:genetika_app/screen/password/forget_password.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,12 +47,24 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = ''; // Reset error message if login is successful
         });
 
+        // Simpan status login dan role user ke SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setInt('role', role);
+
+        // Menggunakan Navigator.pushNamedAndRemoveUntil untuk mengganti halaman
         if (role == 2) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomeGuru()));
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/homeGuru', // Nama rute untuk halaman HomeGuru
+            (route) => false, // Menghapus semua riwayat halaman sebelumnya
+          );
         } else if (role == 3) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomeSiswa()));
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/homeSiswa', // Nama rute untuk halaman HomeSiswa
+            (route) => false, // Menghapus semua riwayat halaman sebelumnya
+          );
         } else {
           setState(() {
             errorMessage = 'Access denied for your role';
@@ -117,16 +130,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: 18),
-
-                  // Username field dengan validasi
                   TextField(
                     controller: _usernameController,
                     decoration: _inputDecoration('Username', isUsernameValid),
                     style: TextStyle(color: Colors.black),
                   ),
                   SizedBox(height: 20),
-
-                  // Password field dengan validasi
                   TextField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
@@ -148,19 +157,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     style: TextStyle(color: Colors.black),
                   ),
-
                   SizedBox(height: 10),
-
-                  // Pesan kesalahan
                   if (errorMessage.isNotEmpty)
                     Text(
                       errorMessage,
                       style: TextStyle(color: Colors.red),
                     ),
-
                   SizedBox(height: 20),
-
-                  // Tombol Login
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -185,19 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text('Login'),
                   ),
-
                   SizedBox(height: 20),
-
-                  // Forgot Password Button
                   Align(
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ForgetPasswordPage()),
-                        );
+                        Navigator.pushNamed(context, 'forgetpaswword');
                       },
                       child: Text(
                         'Forgotten your password? Reset Password',
@@ -208,7 +204,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 50),
                 ],
               ),
