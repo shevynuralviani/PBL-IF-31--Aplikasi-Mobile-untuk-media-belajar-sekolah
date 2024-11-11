@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:genetika_app/screen/guru/guru_homepage.dart';
 import 'package:genetika_app/screen/siswa/materi.dart';
 import 'screen/login/login.dart';
 import 'screen/login/started.dart';
@@ -9,7 +12,6 @@ import 'screen/siswa/materi.dart';
 import 'screen/siswa/videopage.dart';
 import 'screen/siswa/favoritpage.dart';
 import 'screen/password/forget_password.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -28,12 +30,12 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) =>
             LoginScreen(), // Define the route for the login page
-         'forgetpaswword': (context) => ForgetPasswordPage(),
-        '/home': (context) => const HomeSiswa(),
-        '/materi': (context) => const MateriPage(),
-        '/video': (context) => VideoPage(),
-        '/favorit': (context) => FavoritePage(),
-
+        'forgetpaswword': (context) => ForgetPasswordPage(),
+        '/homeSiswa': (context) => const HomeSiswa(),
+        '/materiSiswa': (context) => const MateriPage(),
+        '/videoSiswa': (context) => VideoPage(),
+        '/favoritSiswa': (context) => FavoritePage(),
+        '/homeGuru': (context) => const HomeGuru(),
       },
     );
   }

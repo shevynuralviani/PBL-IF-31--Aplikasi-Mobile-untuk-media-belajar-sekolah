@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:genetika_app/screen/guru/guru_homepage.dart'; // Halaman untuk guru
+import 'package:genetika_app/screen/siswa/siswa_homepage.dart'; // Halaman untuk siswa
 import 'package:genetika_app/screen/password/forget_password.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,7 +19,57 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordValid = true;
   bool _isPasswordVisible = false;
 
-  // Fungsi untuk mengembalikan InputDecoration dengan border hijau atau merah berdasarkan validasi
+  // Fungsi login yang mengirim request ke backend
+  Future<void> login() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Username dan password harus diisi';
+      });
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2/practice_api/loginuser.php'),
+      body: {
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['status'] == 'success') {
+        final role = data['role'];
+
+        setState(() {
+          errorMessage = ''; // Reset error message if login is successful
+        });
+
+        if (role == 2) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => HomeGuru()));
+        } else if (role == 3) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => HomeSiswa()));
+        } else {
+          setState(() {
+            errorMessage = 'Access denied for your role';
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = data['message'];
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'Server error, please try again later';
+      });
+    }
+  }
+
+  // Fungsi untuk dekorasi input (username dan password)
   InputDecoration _inputDecoration(String labelText, bool isValid) {
     return InputDecoration(
       labelText: labelText,
@@ -76,8 +130,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
-                    decoration: _inputDecoration('Password', isPasswordValid)
-                        .copyWith(
+                    decoration:
+                        _inputDecoration('Password', isPasswordValid).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
@@ -111,16 +165,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       setState(() {
                         isUsernameValid = _usernameController.text.isNotEmpty;
-                        isPasswordValid =
-                            _passwordController.text == 'password123';
+                        isPasswordValid = _passwordController.text.isNotEmpty;
 
                         if (!isUsernameValid) {
                           errorMessage = 'Username cannot be empty';
                         } else if (!isPasswordValid) {
-                          errorMessage = 'Wrong Password';
+                          errorMessage = 'Password cannot be empty';
                         } else {
                           errorMessage = '';
-                          Navigator.pushReplacementNamed(context, '/home');
+                          login(); // Panggil login jika valid
                         }
                       });
                     },
@@ -140,7 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () {
-                        // Navigasi ke halaman Forget Password menggunakan MaterialPageRoute
                         Navigator.push(
                           context,
                           MaterialPageRoute(
