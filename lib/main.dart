@@ -12,23 +12,28 @@ import 'screen/siswa/videopage.dart';
 import 'screen/siswa/favoritpage.dart';
 import 'screen/password/forget_password.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final isLoggedIn = token != null; // Cek apakah sudah login
+  final role = prefs.getInt('role'); // Ambil role pengguna
+
+  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  final int? role;
+
+  const MyApp({super.key, required this.isLoggedIn, this.role});
 
   Future<Widget> _getInitialScreen() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    final role = prefs.getInt('role');
-
     if (isLoggedIn) {
       if (role == 2) {
-        return const HomeGuru(); // Halaman untuk guru
+        return HomeGuru(); // Halaman untuk guru
       } else if (role == 3) {
-        return const HomeSiswa(); // Halaman untuk siswa
+        return HomeSiswa(); // Halaman untuk siswa
       }
     }
     return StartedScreen(); // Jika belum login, arahkan ke halaman start
@@ -40,25 +45,38 @@ class MyApp extends StatelessWidget {
       future: _getInitialScreen(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Tampilan loading
+          return CircularProgressIndicator(); // Tampilan loading
         } else {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: ThemeData(fontFamily: 'Poppins'),
-            home: snapshot
-                .data, // The screen will be determined by the login status
+            home: snapshot.data,
             routes: {
               '/login': (context) => LoginScreen(),
-              'forgetpassword': (context) => ForgetPasswordPage(),
-              '/homeSiswa': (context) => const HomeSiswa(),
-              '/materiSiswa': (context) => const MateriPage(),
+              '/forgetpassword': (context) => ForgetPasswordPage(),
+              '/homeSiswa': (context) => HomeSiswa(),
+              '/materiSiswa': (context) => MateriPage(),
               '/videoSiswa': (context) => VideoPage(),
               '/favoritSiswa': (context) => FavoritePage(),
-              '/homeGuru': (context) => const HomeGuru(),
+              '/homeGuru': (context) => HomeGuru(),
             },
           );
         }
       },
     );
   }
+}
+
+Future<void> saveLoginStatus(String token, int role) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString('token', token);
+  prefs.setBool('isLoggedIn', true);
+  prefs.setInt('role', role);
+}
+
+Future<void> logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.remove('token'); // Hapus token
+  prefs.remove('isLoggedIn'); // Hapus status login
+  prefs.remove('role'); // Hapus role pengguna
 }

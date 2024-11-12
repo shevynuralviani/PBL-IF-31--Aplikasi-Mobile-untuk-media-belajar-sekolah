@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:genetika_app/screen/password/change_password.dart';
 import 'package:genetika_app/screen/login/login.dart';
-
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -151,7 +151,8 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   height: 40,
                   child: const CircleAvatar(
                     radius: 20,
-                    backgroundImage: AssetImage('assets/images/logo-sekolah.png'),
+                    backgroundImage:
+                        AssetImage('assets/images/logo-sekolah.png'),
                   ),
                 ),
               ),
@@ -173,7 +174,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-	      side: const BorderSide(color: Color(0xFF7BBB07), width: 2),
+        side: const BorderSide(color: Color(0xFF7BBB07), width: 2),
       ),
       items: [
         const PopupMenuItem(
@@ -226,7 +227,6 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               'Change Password',
               style: TextStyle(color: Colors.black),
             ),
-            // action untu change password
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -243,13 +243,10 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               'Logout',
               style: TextStyle(color: Colors.red),
             ),
-            // action untuk logout
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()), 
-              );
+              _showLogoutConfirmationDialog(
+                  context); // Tampilkan konfirmasi logout
             },
           ),
         ),
@@ -279,5 +276,42 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         );
       },
     );
+  }
+
+  // Tambahkan method untuk menampilkan konfirmasi logout
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Logout'),
+          content: const Text('Apakah Anda yakin ingin logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Tutup dialog konfirmasi logout
+                await logout(); // Menunggu hingga logout selesai
+                Navigator.pushReplacementNamed(
+                    context, '/login'); // Arahkan ke halaman login
+              },
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fungsi logout untuk menghapus token dan data login
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token'); // Menghapus token yang tersimpan
+    await prefs.remove('user'); // Jika Anda menyimpan data lain
   }
 }
