@@ -6,52 +6,58 @@ import 'package:genetika_app/screen/siswa/materi.dart';
 import 'screen/login/login.dart';
 import 'screen/login/started.dart';
 import 'screen/siswa/siswa_homepage.dart';
-import 'screen/navbar/custom_appbar.dart';
-import 'screen/navbar/bottom_bar.dart';
 import 'screen/siswa/videopage.dart';
 import 'screen/siswa/favoritpage.dart';
 import 'screen/password/forget_password.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  final isLoggedIn = token != null; // Cek apakah sudah login
-  final role = prefs.getInt('role'); // Ambil role pengguna
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Untuk memastikan Flutter siap sebelum menjalankan kode async
+  final prefs =
+      await SharedPreferences.getInstance(); // Mengakses penyimpanan lokal
+  final token = prefs.getString('token'); // Ambil token login (jika ada)
+  final isLoggedIn = token != null; // Cek apakah pengguna sudah login
+  final role = prefs.getInt('role'); // Ambil peran pengguna (role)
 
-  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
+  runApp(MyApp(isLoggedIn: isLoggedIn, role: role)); // Jalankan aplikasi
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  final int? role;
+  final bool isLoggedIn; // Status login pengguna
+  final int? role; // Peran pengguna (misalnya, guru atau siswa)
 
   const MyApp({super.key, required this.isLoggedIn, this.role});
 
+  // Menentukan layar awal berdasarkan status login dan peran
   Future<Widget> _getInitialScreen() async {
     if (isLoggedIn) {
+      // Jika sudah login, tentukan berdasarkan peran
       if (role == 2) {
         return HomeGuru(); // Halaman untuk guru
       } else if (role == 3) {
         return HomeSiswa(); // Halaman untuk siswa
       }
     }
-    return StartedScreen(); // Jika belum login, arahkan ke halaman start
+    // Jika belum login, arahkan ke halaman mulai
+    return StartedScreen();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Widget>(
-      future: _getInitialScreen(),
+      future: _getInitialScreen(), // Panggil fungsi untuk menentukan layar awal
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Tampilan loading
+          // Tampilkan loading saat layar awal diproses
+          return const Center(child: CircularProgressIndicator());
         } else {
+          // Jika layar awal sudah ditentukan, jalankan aplikasi
           return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(fontFamily: 'Poppins'),
-            home: snapshot.data,
+            debugShowCheckedModeBanner: false, // Hilangkan banner debug
+            theme: ThemeData(fontFamily: 'Poppins'), // Atur tema aplikasi
+            home: snapshot.data, // Layar awal
             routes: {
+              // Definisikan rute (navigasi halaman)
               '/login': (context) => LoginScreen(),
               '/forgetpassword': (context) => ForgetPasswordPage(),
               '/homeSiswa': (context) => HomeSiswa(),
@@ -67,16 +73,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Fungsi untuk menyimpan status login
 Future<void> saveLoginStatus(String token, int role) async {
   final prefs = await SharedPreferences.getInstance();
-  prefs.setString('token', token);
-  prefs.setBool('isLoggedIn', true);
-  prefs.setInt('role', role);
+  prefs.setString('token', token); // Simpan token
+  prefs.setBool('isLoggedIn', true); // Tandai sudah login
+  prefs.setInt('role', role); // Simpan peran pengguna
 }
 
+// Fungsi untuk logout
 Future<void> logout() async {
   final prefs = await SharedPreferences.getInstance();
   prefs.remove('token'); // Hapus token
   prefs.remove('isLoggedIn'); // Hapus status login
-  prefs.remove('role'); // Hapus role pengguna
+  prefs.remove('role'); // Hapus peran pengguna
 }
