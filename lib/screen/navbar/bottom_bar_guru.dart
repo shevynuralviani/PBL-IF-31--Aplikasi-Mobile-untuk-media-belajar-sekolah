@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-class BottomBar extends StatelessWidget {
+class BottomBarGuru extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const BottomBar({
+  const BottomBarGuru({
     Key? key,
     required this.currentIndex,
     required this.onTap,

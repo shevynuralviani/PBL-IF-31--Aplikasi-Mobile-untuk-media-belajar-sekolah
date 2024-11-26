@@ -30,7 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2/practice_api/loginuser.php'),
+      Uri.parse(
+          'http://10.0.2.2/practice_api/loginuser.php'), // http://10.0.2.2/practice_api/loginuser.php
       body: {
         'username': _usernameController.text,
         'password': _passwordController.text,
