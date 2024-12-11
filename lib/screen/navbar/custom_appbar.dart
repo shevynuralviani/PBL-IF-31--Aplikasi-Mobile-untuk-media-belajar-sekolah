@@ -94,18 +94,21 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               height: 40,
             ),
             const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SMA IT',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Text(
-                  'ULIL ALBAB BATAM',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ],
+            const Expanded(
+              // Menggunakan Expanded di sini
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SMA IT',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    'ULIL ALBAB BATAM',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -278,7 +281,6 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // Tambahkan method untuk menampilkan konfirmasi logout
   void _showLogoutConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -296,9 +298,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             TextButton(
               onPressed: () async {
                 Navigator.pop(context); // Tutup dialog konfirmasi logout
-                await logout(); // Menunggu hingga logout selesai
-                Navigator.pushReplacementNamed(
-                    context, '/login'); // Arahkan ke halaman login
+                await logout(context); // Panggil fungsi logout
               },
               child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
@@ -308,10 +308,18 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // Fungsi logout untuk menghapus token dan data login
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false); // Menyimpan status login
+    await prefs.remove('role'); // Menghapus peran pengguna
     await prefs.remove('token'); // Menghapus token yang tersimpan
-    await prefs.remove('user'); // Jika Anda menyimpan data lain
+    await prefs.remove('user'); // Menghapus data pengguna lainnya
+
+    // Kembali ke halaman login
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login', // Nama rute untuk halaman login
+      (route) => false, // Menghapus semua riwayat halaman sebelumnya
+    );
   }
 }

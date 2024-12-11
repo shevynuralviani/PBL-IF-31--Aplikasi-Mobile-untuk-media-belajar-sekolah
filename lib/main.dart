@@ -1,70 +1,79 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:genetika_app/screen/guru/guru_homepage.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Pastikan ini diimpor
+import 'package:genetika_app/screen/guru/upload%20_materi_page.dart';
+import 'package:genetika_app/screen/guru/add_materi_page.dart';
 import 'package:genetika_app/screen/siswa/materi.dart';
-import 'screen/login/login.dart';
-import 'screen/login/started.dart';
-import 'screen/siswa/siswa_homepage.dart';
-import 'screen/siswa/videopage.dart';
-import 'screen/siswa/favoritpage.dart';
-import 'screen/password/forget_password.dart';
+import 'package:genetika_app/screen/login/login.dart';
+import 'package:genetika_app/screen/login/started.dart';
+import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
+import 'package:genetika_app/screen/navbar/custom_appbar.dart';
+import 'package:genetika_app/screen/navbar/bottom_bar.dart';
+import 'package:genetika_app/screen/siswa/videopage.dart';
+import 'package:genetika_app/screen/siswa/favoritpage.dart';
+import 'package:genetika_app/screen/password/forget_password.dart';
+import 'package:genetika_app/screen/guru/guru_homepage.dart';
+import 'package:genetika_app/screen/siswa/isi_materi.dart';
+import 'package:genetika_app/screen/guru/video_gurupage.dart';
+import 'package:genetika_app/screen/guru/materi_list_page.dart';
+import 'package:genetika_app/screen/guru/edit_materi_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // Untuk memastikan Flutter siap sebelum menjalankan kode async
-  final prefs =
-      await SharedPreferences.getInstance(); // Mengakses penyimpanan lokal
-  final token = prefs.getString('token'); // Ambil token login (jika ada)
-  final isLoggedIn = token != null; // Cek apakah pengguna sudah login
-  final role = prefs.getInt('role'); // Ambil peran pengguna (role)
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final isLoggedIn = token != null;
+  final role = prefs.getString('role'); // Mengambil role sebagai string
 
-  runApp(MyApp(isLoggedIn: isLoggedIn, role: role)); // Jalankan aplikasi
+  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn; // Status login pengguna
-  final int? role; // Peran pengguna (misalnya, guru atau siswa)
+  final bool isLoggedIn;
+  final String? role; // Mengubah tipe role menjadi String
 
   const MyApp({super.key, required this.isLoggedIn, this.role});
 
-  // Menentukan layar awal berdasarkan status login dan peran
   Future<Widget> _getInitialScreen() async {
     if (isLoggedIn) {
-      // Jika sudah login, tentukan berdasarkan peran
-      if (role == 2) {
-        return HomeGuru(); // Halaman untuk guru
-      } else if (role == 3) {
-        return HomeSiswa(); // Halaman untuk siswa
+      if (role == 'guru') {
+        // Memeriksa role sebagai string
+        return HomeGuru();
+      } else if (role == 'siswa') {
+        return HomeSiswa();
       }
     }
-    // Jika belum login, arahkan ke halaman mulai
     return StartedScreen();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Widget>(
-      future: _getInitialScreen(), // Panggil fungsi untuk menentukan layar awal
+      future: _getInitialScreen(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Tampilkan loading saat layar awal diproses
           return const Center(child: CircularProgressIndicator());
         } else {
-          // Jika layar awal sudah ditentukan, jalankan aplikasi
           return MaterialApp(
-            debugShowCheckedModeBanner: false, // Hilangkan banner debug
-            theme: ThemeData(fontFamily: 'Poppins'), // Atur tema aplikasi
-            home: snapshot.data, // Layar awal
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(fontFamily: 'Poppins'),
+            home: snapshot.data,
             routes: {
-              // Definisikan rute (navigasi halaman)
               '/login': (context) => LoginScreen(),
               '/forgetpassword': (context) => ForgetPasswordPage(),
               '/homeSiswa': (context) => HomeSiswa(),
               '/materiSiswa': (context) => MateriPage(),
+              '/materiRead': (context) => const ReadMateri(),
+              '/addmateri': (context) => AddMateriPage(
+                    onSave: (judul, file) {
+                      Navigator.pop(context, {'judul': judul, 'file': file});
+                    },
+                  ),
               '/videoSiswa': (context) => VideoPage(),
               '/favoritSiswa': (context) => FavoritePage(),
               '/homeGuru': (context) => HomeGuru(),
+              '/materilist': (context) => MateriListPage(),
+              '/upload': (context) => UploadMateriPage(),
+              '/edit': (context) => EditMateriPage(materi: {}),
             },
           );
         }
@@ -73,18 +82,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Fungsi untuk menyimpan status login
-Future<void> saveLoginStatus(String token, int role) async {
+Future<void> saveLoginStatus(String token, String role) async {
+  // Mengubah tipe role menjadi String
   final prefs = await SharedPreferences.getInstance();
-  prefs.setString('token', token); // Simpan token
-  prefs.setBool('isLoggedIn', true); // Tandai sudah login
-  prefs.setInt('role', role); // Simpan peran pengguna
-}
-
-// Fungsi untuk logout
-Future<void> logout() async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.remove('token'); // Hapus token
-  prefs.remove('isLoggedIn'); // Hapus status login
-  prefs.remove('role'); // Hapus peran pengguna
+  prefs.setString('token', token);
+  prefs.setBool('isLoggedIn', true);
+  prefs.setString('role', role); // Menyimpan role sebagai string
 }

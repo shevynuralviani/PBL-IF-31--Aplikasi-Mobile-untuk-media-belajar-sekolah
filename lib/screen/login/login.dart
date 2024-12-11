@@ -30,8 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final response = await http.post(
-      Uri.parse(
-          'http://10.0.2.2/practice_api/loginuser.php'), // http://10.0.2.2/practice_api/loginuser.php
+      Uri.parse('http://10.0.2.2/api/loginuser.php'),
       body: {
         'username': _usernameController.text,
         'password': _passwordController.text,
@@ -51,7 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
         // Simpan status login dan role user ke SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        await prefs.setInt('role', role);
+        await prefs.setString(
+            'role', role.toString()); // Simpan role sebagai string
 
         // Menggunakan Navigator.pushNamedAndRemoveUntil untuk mengganti halaman
         if (role == 2) {
@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 18),
                   TextField(
                     controller: _usernameController,
-                    decoration: _inputDecoration('Username', isUsernameValid),
+                    decoration: _inputDecoration('Username ', isUsernameValid),
                     style: TextStyle(color: Colors.black),
                   ),
                   SizedBox(height: 20),

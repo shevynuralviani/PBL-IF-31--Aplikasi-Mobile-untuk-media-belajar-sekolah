@@ -316,4 +316,17 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs.remove('role');
+
+    // Kembali ke halaman login
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login', // Nama rute untuk halaman login
+      (route) => false, // Menghapus semua riwayat halaman sebelumnya
+    );
+  }
 }

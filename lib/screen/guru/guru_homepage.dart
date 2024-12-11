@@ -6,6 +6,8 @@ import 'package:genetika_app/screen/guru/vidio.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:genetika_app/screen/navbar/custom_appbar.dart';
 import 'package:genetika_app/screen/navbar/bottom_bar_guru.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:genetika_app/screen/guru/materi_list_page.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -27,7 +29,7 @@ class _HomeGuruState extends State<HomeGuru> {
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
     const MyHomeGuruPage(),
-    MateriGuruPage(),
+    MateriListPage(),
     VideoListPage(),
   ];
 
@@ -215,6 +217,19 @@ class _MyHomeGuruPageState extends State<MyHomeGuruPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs.remove('role');
+
+    // Kembali ke halaman login
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login', // Nama rute untuk halaman login
+      (route) => false, // Menghapus semua riwayat halaman sebelumnya
     );
   }
 }
