@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
 import 'package:genetika_app/screen/siswa/videopage.dart';
 
-
 class MateriPage extends StatefulWidget {
   const MateriPage({super.key});
 
@@ -13,7 +12,7 @@ class MateriPage extends StatefulWidget {
 class _MateriPageState extends State<MateriPage> {
   // List to keep track of which items are favorited
   List<bool> isFavorited = [false, false, false, false];
-  
+
   int _selectedIndex = 1; // Track selected bottom nav item
 
   // List halaman yang akan ditampilkan
@@ -33,12 +32,13 @@ class _MateriPageState extends State<MateriPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: Text('Materi Pelajaran'),
+        title: Text('Materi Pelajaran'),
       ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Padding added to the whole body
+            padding:
+                const EdgeInsets.all(16.0), // Padding added to the whole body
             child: Column(
               children: [
                 const SizedBox(height: 20),
@@ -110,7 +110,8 @@ class _MateriPageState extends State<MateriPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(subtitle),
                   const SizedBox(height: 5),
@@ -123,7 +124,8 @@ class _MateriPageState extends State<MateriPage> {
                         child: LinearProgressIndicator(
                           value: progressValue,
                           backgroundColor: Colors.grey[300],
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7BBB07)),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFF7BBB07)),
                           minHeight: 5,
                         ),
                       ),

@@ -21,10 +21,14 @@ class _ReadMateriState extends State<ReadMateri> {
   ];
 
   final Map<String, String> _contentMap = {
-    "Bab 1: Pengantar Genetika": "Genetika adalah cabang ilmu biologi yang mempelajari pewarisan sifat...",
-    "Bab 2: Struktur DNA": "DNA adalah materi genetik yang terdapat dalam inti sel, terdiri dari dua rantai...",
-    "Bab 3: Replikasi DNA": "Replikasi DNA adalah proses penggandaan molekul DNA sebelum sel membelah...",
-    "Bab 4: Transkripsi dan Translasi": "Transkripsi adalah proses pembentukan RNA dari template DNA, sementara translasi adalah proses sintesis protein..."
+    "Bab 1: Pengantar Genetika":
+        "Genetika adalah cabang ilmu biologi yang mempelajari pewarisan sifat...",
+    "Bab 2: Struktur DNA":
+        "DNA adalah materi genetik yang terdapat dalam inti sel, terdiri dari dua rantai...",
+    "Bab 3: Replikasi DNA":
+        "Replikasi DNA adalah proses penggandaan molekul DNA sebelum sel membelah...",
+    "Bab 4: Transkripsi dan Translasi":
+        "Transkripsi adalah proses pembentukan RNA dari template DNA, sementara translasi adalah proses sintesis protein..."
   };
 
   @override
@@ -71,7 +75,8 @@ class _ReadMateriState extends State<ReadMateri> {
                       ),
                       onTap: () {
                         setState(() {
-                          _mainContent = _contentMap[bab] ?? 'Konten tidak ditemukan.';
+                          _mainContent =
+                              _contentMap[bab] ?? 'Konten tidak ditemukan.';
                         });
                         Navigator.pop(context); // Tutup drawer setelah memilih
                       },

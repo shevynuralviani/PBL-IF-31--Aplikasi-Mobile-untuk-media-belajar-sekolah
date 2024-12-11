@@ -20,7 +20,34 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordValid = true;
   bool _isPasswordVisible = false;
 
-  // Fungsi login yang mengirim request ke backend
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus(); // Memeriksa status login saat aplikasi dimulai
+  }
+
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final role = prefs.getString('role');
+
+    if (isLoggedIn) {
+      if (role == '2') {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/homeGuru',
+          (route) => false,
+        );
+      } else if (role == '3') {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/homeSiswa',
+          (route) => false,
+        );
+      }
+    }
+  }
+
   Future<void> login() async {
     if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
@@ -83,7 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Fungsi untuk dekorasi input (username dan password)
   InputDecoration _inputDecoration(String labelText, bool isValid) {
     return InputDecoration(
       labelText: labelText,
