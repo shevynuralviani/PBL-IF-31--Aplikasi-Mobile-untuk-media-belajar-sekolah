@@ -6,14 +6,11 @@ import 'package:genetika_app/screen/siswa/materi.dart';
 import 'package:genetika_app/screen/login/login.dart';
 import 'package:genetika_app/screen/login/started.dart';
 import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
-import 'package:genetika_app/screen/navbar/custom_appbar.dart';
-import 'package:genetika_app/screen/navbar/bottom_bar.dart';
 import 'package:genetika_app/screen/siswa/videopage.dart';
 import 'package:genetika_app/screen/siswa/favoritpage.dart';
 import 'package:genetika_app/screen/password/forget_password.dart';
 import 'package:genetika_app/screen/guru/guru_homepage.dart';
 import 'package:genetika_app/screen/siswa/isi_materi.dart';
-import 'package:genetika_app/screen/guru/video_gurupage.dart';
 import 'package:genetika_app/screen/guru/materi_list_page.dart';
 import 'package:genetika_app/screen/guru/edit_materi_page.dart';
 
