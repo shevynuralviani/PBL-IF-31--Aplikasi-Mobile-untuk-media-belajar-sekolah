@@ -118,44 +118,18 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Row(
             children: [
-              TextButton(
+              IconButton(
                 onPressed: () {
                   _showProfileDropdown(context);
                 },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                icon: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0x40B4D924),
-                    borderRadius: BorderRadius.circular(20),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Color(0xFF7BBB07), width: 2),
                   ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.person, size: 20),
-                      SizedBox(width: 5),
-                      Text(
-                        'Profil',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () {
-                  _showImageDialog(context);
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  child: const CircleAvatar(
-                    radius: 20,
-                    backgroundImage:
-                        AssetImage('assets/images/logo-sekolah.png'),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: Icon(Icons.person, color: Colors.green),
                   ),
                 ),
               ),
@@ -309,17 +283,40 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Future<void> logout(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false); // Menyimpan status login
-    await prefs.remove('role'); // Menghapus peran pengguna
-    await prefs.remove('token'); // Menghapus token yang tersimpan
-    await prefs.remove('user'); // Menghapus data pengguna lainnya
+    final prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    // Kembali ke halaman login
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/login', // Nama rute untuk halaman login
-      (route) => false, // Menghapus semua riwayat halaman sebelumnya
-    );
+    // Pastikan hanya logout jika pengguna sedang login
+    if (isLoggedIn) {
+      // Ambil role dan currentUserId dari SharedPreferences
+      String? role = prefs.getString('role');
+      String? currentUserId = prefs.getString('currentUserId');
+
+      // Anda bisa menambahkan pengecekan lebih lanjut berdasarkan role atau currentUserId
+      if (role != null && currentUserId != null) {
+        print('User with ID $currentUserId and role $role is logging out.');
+      }
+
+      // Hapus semua data terkait login
+      await prefs.setBool('isLoggedIn', false);
+      await prefs.remove('currentUserId'); // Hapus currentUserId setelah logout
+      await prefs.remove('role'); // Hapus peran pengguna
+      await prefs.remove('token'); // Hapus token yang tersimpan
+      await prefs.remove('user'); // Hapus data pengguna lainnya
+
+      // Kembali ke halaman login setelah logout
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login', // Rute untuk halaman login
+        (route) => false, // Menghapus semua riwayat halaman sebelumnya
+      );
+    } else {
+      // Jika pengguna belum login, arahkan ke halaman login
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+        (route) => false,
+      );
+    }
   }
 }

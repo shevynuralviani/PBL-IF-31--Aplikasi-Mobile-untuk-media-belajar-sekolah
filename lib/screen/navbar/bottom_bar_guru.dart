@@ -21,21 +21,21 @@ class BottomBarGuru extends StatelessWidget {
         SalomonBottomBarItem(
           icon: const Icon(Icons.home),
           title: const Text("Home"),
-          selectedColor: const Color(0xFF7BBB07), // Warna hijau saat dipilih
+          selectedColor: const Color(0xFF399918), 
         ),
 
         /// Materi
         SalomonBottomBarItem(
           icon: const Icon(Icons.book),
           title: const Text("Materi"),
-          selectedColor: const Color(0xFF7BBB07), // Warna hijau saat dipilih
+          selectedColor: const Color(0xFF399918), 
         ),
 
         /// Video
         SalomonBottomBarItem(
           icon: const Icon(Icons.video_library),
           title: const Text("Video"),
-          selectedColor: const Color(0xFF7BBB07), // Warna hijau saat dipilih
+          selectedColor: const Color(0xFF399918), 
         ),
       ],
     );

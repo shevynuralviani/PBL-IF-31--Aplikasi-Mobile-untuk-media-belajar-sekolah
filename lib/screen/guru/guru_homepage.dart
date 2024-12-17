@@ -25,6 +25,7 @@ class HomeGuru extends StatefulWidget {
 
 class _HomeGuruState extends State<HomeGuru> {
   int _selectedIndex = 0; // Track selected bottom nav item
+  String currentUserId = ''; // Menyimpan currentUserId
 
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
@@ -32,6 +33,23 @@ class _HomeGuruState extends State<HomeGuru> {
     MateriListPage(),
     VideoListPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData(); // Memanggil fungsi untuk memuat data pengguna
+  }
+
+  // Fungsi untuk memuat currentUserId dari SharedPreferences
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentUserId =
+          prefs.getString('currentUserId') ?? ''; // Mendapatkan currentUserId
+    });
+    print(
+        "Current User ID: $currentUserId"); // Menampilkan ID pengguna ke konsol
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -222,10 +240,13 @@ class _MyHomeGuruPageState extends State<MyHomeGuruPage> {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('role');
+    await prefs.setBool(
+        'isLoggedIn', false); // Menyimpan status login sebagai false
+    await prefs
+        .remove('currentUserId'); // Menghapus currentUserId setelah logout
+    await prefs.remove('role'); // Menghapus role jika ada
 
-    // Kembali ke halaman login
+    // Navigasi ke halaman login dan hapus semua riwayat halaman sebelumnya
     Navigator.pushNamedAndRemoveUntil(
       context,
       '/login', // Nama rute untuk halaman login

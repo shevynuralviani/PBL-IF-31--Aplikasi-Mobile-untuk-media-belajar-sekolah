@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Pastikan ini diimpor
 import 'package:genetika_app/screen/guru/upload%20_materi_page.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Pastikan ini diimpor
 import 'package:genetika_app/screen/guru/add_materi_page.dart';
 import 'package:genetika_app/screen/siswa/materi.dart';
 import 'package:genetika_app/screen/login/login.dart';
@@ -20,20 +20,24 @@ void main() async {
   final token = prefs.getString('token');
   final isLoggedIn = token != null;
   final role = prefs.getString('role'); // Mengambil role sebagai string
+  final currentUserId =
+      prefs.getString('currentUserId'); // Mengambil currentUserId
 
-  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
+  runApp(
+      MyApp(isLoggedIn: isLoggedIn, role: role, currentUserId: currentUserId));
 }
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
-  final String? role; // Mengubah tipe role menjadi String
+  final String? role;
+  final String? currentUserId;
 
-  const MyApp({super.key, required this.isLoggedIn, this.role});
+  const MyApp(
+      {super.key, required this.isLoggedIn, this.role, this.currentUserId});
 
   Future<Widget> _getInitialScreen() async {
     if (isLoggedIn) {
       if (role == 'guru') {
-        // Memeriksa role sebagai string
         return HomeGuru();
       } else if (role == 'siswa') {
         return HomeSiswa();
@@ -77,12 +81,4 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-}
-
-Future<void> saveLoginStatus(String token, String role) async {
-  // Mengubah tipe role menjadi String
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setString('token', token);
-  prefs.setBool('isLoggedIn', true);
-  prefs.setString('role', role); // Menyimpan role sebagai string
 }

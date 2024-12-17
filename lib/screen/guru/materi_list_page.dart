@@ -32,7 +32,13 @@ class _MateriListPageState extends State<MateriListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daftar Materi'),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: ListView.builder(
         itemCount: materi.length,
@@ -87,7 +93,7 @@ class _MateriListPageState extends State<MateriListPage> {
           );
         },
         child: const Icon(Icons.add),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.white,
       ),
     );
   }

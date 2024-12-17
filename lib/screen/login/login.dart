@@ -68,26 +68,31 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (data['status'] == 'success') {
-        final role = data['role'];
+        final role = data['role']; // Ambil role sebagai integer
+        final userId = data['user_id']; // Ambil user_id dari respons
 
         setState(() {
-          errorMessage = ''; // Reset error message if login is successful
+          errorMessage = ''; // Reset error message jika login berhasil
         });
 
-        // Simpan status login dan role user ke SharedPreferences
+        // Simpan status login, role, dan currentUserId ke SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
         await prefs.setString(
             'role', role.toString()); // Simpan role sebagai string
+        await prefs.setString(
+            'currentUserId', userId.toString()); // Simpan currentUserId
 
         // Menggunakan Navigator.pushNamedAndRemoveUntil untuk mengganti halaman
         if (role == 2) {
+          // Role sebagai integer
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/homeGuru', // Nama rute untuk halaman HomeGuru
             (route) => false, // Menghapus semua riwayat halaman sebelumnya
           );
         } else if (role == 3) {
+          // Role sebagai integer
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/homeSiswa', // Nama rute untuk halaman HomeSiswa
@@ -95,17 +100,17 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         } else {
           setState(() {
-            errorMessage = 'Access denied for your role';
+            errorMessage = 'Access denied for your role'; // Role tidak valid
           });
         }
       } else {
         setState(() {
-          errorMessage = data['message'];
+          errorMessage = data['message']; // Tampilkan pesan error
         });
       }
     } else {
       setState(() {
-        errorMessage = 'Server error, please try again later';
+        errorMessage = 'Server error, please try again later'; // Error server
       });
     }
   }
@@ -223,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushNamed(context, '/forgetpassword');
                       },
                       child: Text(
-                        'Forgotten your password? Reset Password',
+                        'Forgotten your password?',
                         style: TextStyle(
                           color: Color(0xFF7DBD07),
                           decoration: TextDecoration.none,

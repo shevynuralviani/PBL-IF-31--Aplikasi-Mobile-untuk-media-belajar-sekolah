@@ -46,9 +46,10 @@ class _AddMateriPageState extends State<AddMateriPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.existingTitle == null ? 'Tambah Materi' : 'Edit Materi'),
-        backgroundColor: Colors.green,
+        title: Text(widget.existingTitle == null
+            ? 'Tambah Materi'
+            : 'Edit Materi'),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,10 +90,18 @@ class _AddMateriPageState extends State<AddMateriPage> {
                 ),
               ],
             ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                ),
                 onPressed: () {
                   if (_judulController.text.isEmpty || selectedFile == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +117,13 @@ class _AddMateriPageState extends State<AddMateriPage> {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Simpan'),
+                child: const Text(
+                  'Unggah',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:genetika_app/models/materi_model.dart';
+import 'package:genetika_app/screen/siswa/material_detail.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:genetika_app/models/materi_model.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Import for CachedNetworkImage
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MateriPage extends StatefulWidget {
   const MateriPage({super.key});
@@ -15,18 +17,25 @@ class _MateriPageState extends State<MateriPage> {
   List<Materi> _materiList = [];
   List<Materi> _filteredMateriList = [];
   bool _isLoading = true;
+  bool _isUpdatingProgress = false;
+  String currentUserId = '';
   TextEditingController _searchController = TextEditingController();
-  bool _isUpdatingProgress =
-      false; // Untuk mengontrol loading saat update progress
 
   @override
   void initState() {
     super.initState();
+    _getUserId();
     fetchMateri();
-    _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_filterMateriList);
   }
 
-  // Fetch materi dari API
+  Future<void> _getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentUserId = prefs.getString('currentUserId') ?? '';
+    });
+  }
+
   Future<void> fetchMateri() async {
     try {
       final response =
@@ -39,46 +48,45 @@ class _MateriPageState extends State<MateriPage> {
             _materiList = (data['data'] as List)
                 .map((item) => Materi.fromJson(item))
                 .toList();
-            _filteredMateriList = _materiList;
+            _filteredMateriList = List.from(_materiList);
             _isLoading = false;
           });
         } else {
-          _showErrorSnackbar('Failed to fetch materi');
+          _showSnackbar('Failed to load data');
         }
       } else {
-        _showErrorSnackbar('Server error: ${response.statusCode}');
+        _showSnackbar('Server error: ${response.statusCode}');
       }
     } catch (e) {
-      _showErrorSnackbar('Failed to fetch materi: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _showSnackbar('Error fetching data: $e');
     }
   }
 
-  // Menampilkan snackbar error
-  void _showErrorSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  // Fungsi pencarian dengan debounce
-  void _onSearchChanged() {
+  void _filterMateriList() {
     String query = _searchController.text.toLowerCase();
-    Future.delayed(Duration(milliseconds: 300), () {
-      setState(() {
-        _filteredMateriList = _materiList
-            .where((materi) => materi.judul.toLowerCase().contains(query))
-            .toList();
-      });
+    setState(() {
+      _filteredMateriList = _materiList.where((materi) {
+        return materi.judul.toLowerCase().contains(query) ||
+            materi.pengunggahNama.toLowerCase().contains(query) ||
+            materi.bab.toLowerCase().contains(query);
+      }).toList();
     });
   }
 
-  // Update progress materi
+  void _toggleFavorite(Materi materi) {
+    setState(() {
+      materi.isFavorite = !materi.isFavorite;
+    });
+    updateProgress(materi);
+  }
+
   Future<void> updateProgress(Materi materi) async {
-    if (_isUpdatingProgress) return; // Mencegah klik ganda saat update
+    if (_isUpdatingProgress) return;
 
     setState(() {
       _isUpdatingProgress = true;
@@ -87,7 +95,7 @@ class _MateriPageState extends State<MateriPage> {
     final response = await http.post(
       Uri.parse('http://10.0.2.2/api/update_progressmateri.php'),
       body: {
-        'user_id': 'USER_ID', // Ganti dengan ID user yang sesuai
+        'user_id': currentUserId,
         'materi_id': materi.id.toString(),
         'progres': materi.progres.toString(),
         'last_read': DateTime.now().toIso8601String(),
@@ -101,164 +109,77 @@ class _MateriPageState extends State<MateriPage> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data['message'])),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(data['message'])));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update progress')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to update progress')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Materi Pelajaran'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: MateriSearchDelegate(
-                  materiList: _materiList,
-                ),
-              );
-            },
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50),
-          child: Padding(
+      appBar: AppBar(title: Text('Materi Pelajaran')),
+      body: Column(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Cari materi...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                labelText: 'Cari Materi atau Pengunggah',
                 prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
               ),
             ),
           ),
-        ),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _filteredMateriList.length,
-              itemBuilder: (context, index) {
-                final materi = _filteredMateriList[index];
-
-                String imageUrl = materi.photoUrl.isNotEmpty
-                    ? materi.photoUrl
-                    : 'assets/placeholder_image.jpg';
-
-                String pdfUrl = materi.pdfUrl.isNotEmpty
-                    ? materi.pdfUrl
-                    : 'assets/placeholder_pdf.pdf';
-
-                return ListTile(
-                  leading: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    width: 50,
-                    height: 50,
-                  ),
-                  title: Text(materi.judul),
-                  subtitle: Text(
-                      'Bab: ${materi.bab} - Progres: ${(materi.progres * 100).toStringAsFixed(0)}%'),
-                  trailing: IconButton(
-                    icon: Icon(
-                      materi.isFavorite ? Icons.star : Icons.star_border,
-                      color: materi.isFavorite ? Colors.yellow : Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        materi.isFavorite = !materi.isFavorite;
-                      });
-                      updateProgress(materi);
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredMateriList.length,
+                    itemBuilder: (context, index) {
+                      final materi = _filteredMateriList[index];
+                      return ListTile(
+                        leading: CachedNetworkImage(
+                          imageUrl: materi.fotoSampul.isNotEmpty
+                              ? materi.fotoSampul
+                              : 'https://via.placeholder.com/50',
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          width: 50,
+                          height: 50,
+                        ),
+                        title: Text(materi.judul),
+                        subtitle: Text(
+                            'Bab: ${materi.bab} - Progress: ${(materi.progres * 100).toStringAsFixed(0)}%\nPengunggah: ${materi.pengunggahNama}'),
+                        trailing: IconButton(
+                          icon: Icon(
+                            materi.isFavorite ? Icons.star : Icons.star_border,
+                            color:
+                                materi.isFavorite ? Colors.yellow : Colors.grey,
+                          ),
+                          onPressed: () => _toggleFavorite(materi),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MaterialDetailPage(
+                                materi: materi,
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
-                  onTap: () {
-                    setState(() {
-                      materi.progres += 0.1;
-                      if (materi.progres > 1.0) materi.progres = 1.0;
-                    });
-                    updateProgress(materi);
-                  },
-                );
-              },
-            ),
-    );
-  }
-}
-
-// Search delegate for searching materi
-class MateriSearchDelegate extends SearchDelegate {
-  final List<Materi> materiList;
-
-  MateriSearchDelegate({required this.materiList});
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
+                ),
+        ],
       ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final results = materiList
-        .where((materi) =>
-            materi.judul.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final materi = results[index];
-        return ListTile(
-          title: Text(materi.judul),
-          subtitle: Text('Bab: ${materi.bab}'),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = materiList
-        .where((materi) =>
-            materi.judul.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        final materi = suggestions[index];
-        return ListTile(
-          title: Text(materi.judul),
-          subtitle: Text('Bab: ${materi.bab}'),
-        );
-      },
     );
   }
 }

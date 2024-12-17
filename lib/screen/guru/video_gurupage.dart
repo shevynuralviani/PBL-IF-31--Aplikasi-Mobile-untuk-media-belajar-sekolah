@@ -74,45 +74,63 @@ class _VideoListPageState extends State<VideoListPage> {
       appBar: AppBar(
         title: Text('Daftar Video'),
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 16),
-          Expanded(
-            child: _videos.isEmpty
-                ? Center(child: Text("Belum ada video"))
-                : ListView.builder(
-                    itemCount: _videos.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: Icon(Icons.video_library),
-                        title: Text(_videos[index].title),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'Hapus') {
-                              _deleteVideo(index);
-                            } else if (value == 'Edit') {
-                              _editVideo(index);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'Edit',
-                              child: Text('Edit'),
-                            ),
-                            PopupMenuItem(
-                              value: 'Hapus',
-                              child: Text('Hapus'),
-                            ),
-                          ],
-                          icon: Icon(Icons.more_vert),
+      body: Container(
+        color: Colors.white,
+        child: _videos.isEmpty
+            ? Center(child: Text("Belum ada video"))
+            : ListView.builder(
+                itemCount: _videos.length,
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
                         ),
-                        onTap: () => _playVideo(_videos[index].id),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.video_library),
+                      title: Text(_videos[index].title),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'Hapus') {
+                            _deleteVideo(index);
+                          } else if (value == 'Edit') {
+                            _editVideo(index);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'Edit',
+                            child: Text('Edit'),
+                          ),
+                          PopupMenuItem(
+                            value: 'Hapus',
+                            child: Text('Hapus'),
+                          ),
+                        ],
+                        icon: Icon(Icons.more_vert),
+                      ),
+                      onTap: () => _playVideo(_videos[index].id),
+                    ),
+                  );
+                },
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -179,11 +197,12 @@ class _AddVideoPageState extends State<AddVideoPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah/Edit Video'),
-        backgroundColor: const Color.fromARGB(255, 235, 229, 228),
+        backgroundColor: Colors.grey[200],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
               controller: _urlController,
@@ -202,30 +221,28 @@ class _AddVideoPageState extends State<AddVideoPage> {
                 contentPadding: EdgeInsets.all(8),
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: ElevatedButton(
-          onPressed: _saveVideo,
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                const Color.fromARGB(231, 27, 237, 34), // Warna hijau
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Text(
-              'Unggah',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
+            SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: _saveVideo,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              ),
+              child: const Text(
+                'Unggah',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -250,7 +267,7 @@ class VideoPlayerPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Putar Video'),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.green,
       ),
       body: YoutubePlayer(
         controller: _youtubeController,

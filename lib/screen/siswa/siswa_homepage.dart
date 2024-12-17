@@ -34,6 +34,9 @@ class MyApp extends StatelessWidget {
       home: isLoggedIn
           ? HomeSiswa()
           : LoginPage(), // Arahkan ke halaman login jika belum login
+      routes: {
+        '/login': (context) => const LoginPage(), // Menambahkan rute login
+      },
     );
   }
 }
@@ -85,6 +88,7 @@ class HomeSiswa extends StatefulWidget {
 
 class _HomeSiswaState extends State<HomeSiswa> {
   int _selectedIndex = 0; // Track selected bottom nav item
+  String currentUserId = ''; // Menyimpan currentUserId
 
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
@@ -94,6 +98,20 @@ class _HomeSiswaState extends State<HomeSiswa> {
     FavoritePage(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData(); // Memanggil fungsi untuk memuat data pengguna
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentUserId =
+          prefs.getString('currentUserId') ?? ''; // Mendapatkan currentUserId
+    });
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -102,46 +120,32 @@ class _HomeSiswaState extends State<HomeSiswa> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'School App',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
+    return Scaffold(
+      appBar: MyCustomAppBar(),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
       ),
-      debugShowCheckedModeBanner: false,
-      home: WillPopScope(
-        onWillPop: () async {
-          bool shouldExit = await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Keluar Aplikasi"),
-              content:
-                  const Text("Apakah Anda yakin ingin keluar dari aplikasi?"),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("Tidak"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text("Ya"),
-                ),
-              ],
-            ),
-          );
-          return shouldExit ?? false;
-        },
-        child: Scaffold(
-          appBar: MyCustomAppBar(),
-          body: IndexedStack(
-            index: _selectedIndex,
-            children: _pages,
-          ),
-          bottomNavigationBar: BottomBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-          ),
-        ),
+      bottomNavigationBar: BottomBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
+    );
+  }
+
+  // Fungsi logout
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs
+        .remove('currentUserId'); // Menghapus currentUserId setelah logout
+    await prefs.remove('role'); // Menghapus role setelah logout, jika ada
+
+    // Kembali ke halaman login
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login', // Nama rute untuk halaman login
+      (route) => false, // Menghapus semua riwayat halaman sebelumnya
     );
   }
 }
@@ -314,19 +318,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('role');
-
-    // Kembali ke halaman login
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/login', // Nama rute untuk halaman login
-      (route) => false, // Menghapus semua riwayat halaman sebelumnya
     );
   }
 }
