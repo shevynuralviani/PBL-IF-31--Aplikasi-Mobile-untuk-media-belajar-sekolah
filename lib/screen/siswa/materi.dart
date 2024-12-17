@@ -29,6 +29,7 @@ class _MateriPageState extends State<MateriPage> {
     _searchController.addListener(_filterMateriList);
   }
 
+  // Get current user ID from SharedPreferences
   Future<void> _getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -36,6 +37,7 @@ class _MateriPageState extends State<MateriPage> {
     });
   }
 
+  // Fetch Materi data from the API
   Future<void> fetchMateri() async {
     try {
       final response =
@@ -62,11 +64,13 @@ class _MateriPageState extends State<MateriPage> {
     }
   }
 
+  // Display a Snackbar message
   void _showSnackbar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  // Filter the Materi list based on search query
   void _filterMateriList() {
     String query = _searchController.text.toLowerCase();
     setState(() {
@@ -78,13 +82,7 @@ class _MateriPageState extends State<MateriPage> {
     });
   }
 
-  void _toggleFavorite(Materi materi) {
-    setState(() {
-      materi.isFavorite = !materi.isFavorite;
-    });
-    updateProgress(materi);
-  }
-
+  // Update progress of Materi to the server
   Future<void> updateProgress(Materi materi) async {
     if (_isUpdatingProgress) return;
 
@@ -94,13 +92,16 @@ class _MateriPageState extends State<MateriPage> {
 
     final response = await http.post(
       Uri.parse('http://10.0.2.2/api/update_progressmateri.php'),
-      body: {
-        'user_id': currentUserId,
-        'materi_id': materi.id.toString(),
-        'progres': materi.progres.toString(),
-        'last_read': DateTime.now().toIso8601String(),
-        'is_favorite': materi.isFavorite ? '1' : '0',
-      },
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'user_id': currentUserId, // ID pengguna
+        'materi_id': materi.id.toString(), // ID materi
+        'progres': materi.progres
+            .toStringAsFixed(0), // Pastikan progres adalah integer
+        'last_read': DateTime.now().toIso8601String(), // Timestamp saat ini
+        'is_favorite':
+            materi.isFavorite ? 1 : 0, // 1 jika favorit, 0 jika tidak
+      }),
     );
 
     setState(() {
@@ -181,5 +182,13 @@ class _MateriPageState extends State<MateriPage> {
         ],
       ),
     );
+  }
+
+  // Toggle favorite status of Materi
+  void _toggleFavorite(Materi materi) {
+    setState(() {
+      materi.isFavorite = !materi.isFavorite;
+    });
+    updateProgress(materi); // Update progress after toggling favorite
   }
 }
