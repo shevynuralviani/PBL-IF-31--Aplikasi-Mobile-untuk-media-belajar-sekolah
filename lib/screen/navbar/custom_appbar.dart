@@ -41,38 +41,60 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MyCustomAppBar(),
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: const BorderRadius.only(
-                bottomRight: Radius.circular(50),
-              ),
-            ),
-          ),
-          Container(
-            color: Theme.of(context).primaryColor,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(200)),
-              ),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 40,
-                mainAxisSpacing: 30,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
+      body: FutureBuilder(
+        future: _getUserInfo(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasData) {
+            Map<String, String> userInfo = snapshot.data as Map<String, String>;
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(50),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Theme.of(context).primaryColor,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.only(topLeft: Radius.circular(200)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text('Welcome, ${userInfo['name']}'),
+                        Text('Role: ${userInfo['role']}'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            );
+          }
+
+          return const Center(child: Text('No user data found.'));
+        },
       ),
     );
+  }
+
+  Future<Map<String, String>> _getUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    String name = prefs.getString('name') ?? 'Nama Tidak Ditemukan';
+    String role = prefs.getString('role') ?? 'Role Tidak Ditemukan';
+
+    return {'name': name, 'role': role};
   }
 }
 
@@ -95,7 +117,6 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             const SizedBox(width: 10),
             const Expanded(
-              // Menggunakan Expanded di sini
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -144,7 +165,22 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  void _showProfileDropdown(BuildContext context) {
+  void _showProfileDropdown(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    String name = prefs.getString('name') ?? 'Nama Tidak Ditemukan';
+    String username = prefs.getString('username') ?? 'Username Tidak Ditemukan';
+    String labelId = '';
+    String idValue = '';
+
+    String role = prefs.getString('role') ?? '';
+    if (role == '2') {
+      labelId = 'NUPTK';
+      idValue = prefs.getString('nuptk') ?? 'NUPTK Tidak Ditemukan';
+    } else if (role == '3') {
+      labelId = 'NIS';
+      idValue = prefs.getString('nis') ?? 'NIS Tidak Ditemukan';
+    }
+
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(100, 70, 0, 0),
@@ -154,7 +190,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         side: const BorderSide(color: Color(0xFF7BBB07), width: 2),
       ),
       items: [
-        const PopupMenuItem(
+        PopupMenuItem(
           enabled: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +198,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ListTile(
                 leading: Icon(Icons.person, color: Colors.black),
                 title: Text(
-                  'Rina Suryani',
+                  name,
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -176,7 +212,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'XII IPA 3',
+                      username,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14,
@@ -184,7 +220,7 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
                     Text(
-                      'nis : 123456789',
+                      '$labelId: $idValue',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14,
@@ -222,36 +258,11 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             onTap: () {
               Navigator.pop(context);
-              _showLogoutConfirmationDialog(
-                  context); // Tampilkan konfirmasi logout
+              _showLogoutConfirmationDialog(context);
             },
           ),
         ),
       ],
-    );
-  }
-
-  void _showImageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SizedBox(
-            width: 300,
-            height: 300,
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/logo-sekolah.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(100),
-          ),
-        );
-      },
     );
   }
 
@@ -265,14 +276,14 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Tutup dialog
+                Navigator.pop(context);
               },
               child: const Text('Batal'),
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context); // Tutup dialog konfirmasi logout
-                await logout(context); // Panggil fungsi logout
+                Navigator.pop(context);
+                await logout(context);
               },
               child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
@@ -286,32 +297,19 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    // Pastikan hanya logout jika pengguna sedang login
     if (isLoggedIn) {
-      // Ambil role dan currentUserId dari SharedPreferences
-      String? role = prefs.getString('role');
-      String? currentUserId = prefs.getString('currentUserId');
-
-      // Anda bisa menambahkan pengecekan lebih lanjut berdasarkan role atau currentUserId
-      if (role != null && currentUserId != null) {
-        print('User with ID $currentUserId and role $role is logging out.');
-      }
-
-      // Hapus semua data terkait login
       await prefs.setBool('isLoggedIn', false);
-      await prefs.remove('currentUserId'); // Hapus currentUserId setelah logout
-      await prefs.remove('role'); // Hapus peran pengguna
-      await prefs.remove('token'); // Hapus token yang tersimpan
-      await prefs.remove('user'); // Hapus data pengguna lainnya
+      await prefs.remove('currentUserId');
+      await prefs.remove('role');
+      await prefs.remove('token');
+      await prefs.remove('user');
 
-      // Kembali ke halaman login setelah logout
       Navigator.pushNamedAndRemoveUntil(
         context,
-        '/login', // Rute untuk halaman login
-        (route) => false, // Menghapus semua riwayat halaman sebelumnya
+        '/login',
+        (route) => false,
       );
     } else {
-      // Jika pengguna belum login, arahkan ke halaman login
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/login',

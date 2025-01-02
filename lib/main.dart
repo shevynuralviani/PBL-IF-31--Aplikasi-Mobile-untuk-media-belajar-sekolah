@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genetika_app/screen/guru/add_materi.dart';
 import 'package:genetika_app/screen/guru/upload%20_materi_page.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Pastikan ini diimpor
 import 'package:genetika_app/screen/guru/add_materi_page.dart';
@@ -64,11 +65,8 @@ class MyApp extends StatelessWidget {
               '/homeSiswa': (context) => HomeSiswa(),
               '/materiSiswa': (context) => MateriPage(),
               '/materiRead': (context) => const ReadMateri(),
-              '/addmateri': (context) => AddMateriPage(
-                    onSave: (judul, file) {
-                      Navigator.pop(context, {'judul': judul, 'file': file});
-                    },
-                  ),
+              '/addjudulmateri': (context) => TambahMateriPage(),
+              '/addmateri': (context) => MateriContentPage(),
               '/videoSiswa': (context) => VideoPage(),
               '/favoritSiswa': (context) => FavoritePage(),
               '/homeGuru': (context) => HomeGuru(),

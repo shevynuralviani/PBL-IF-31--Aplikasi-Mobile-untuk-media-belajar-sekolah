@@ -15,7 +15,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String errorMessage = '';
-
   bool isUsernameValid = true;
   bool isPasswordValid = true;
   bool _isPasswordVisible = false;
@@ -26,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _checkLoginStatus(); // Memeriksa status login saat aplikasi dimulai
   }
 
+  // Cek apakah sudah login sebelumnya
   void _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -64,11 +64,13 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
 
+    // Periksa respons dari server
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      print('Respons API: $data'); // Debugging respons dari server
 
       if (data['status'] == 'success') {
-        final role = data['role']; // Ambil role sebagai integer
+        final role = data['role']; // Ambil role dari respons
         final userId = data['user_id']; // Ambil user_id dari respons
 
         setState(() {
@@ -78,25 +80,24 @@ class _LoginScreenState extends State<LoginScreen> {
         // Simpan status login, role, dan currentUserId ke SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        await prefs.setString(
-            'role', role.toString()); // Simpan role sebagai string
-        await prefs.setString(
-            'currentUserId', userId.toString()); // Simpan currentUserId
+        await prefs.setString('role', role.toString());
+        await prefs.setString('currentUserId', userId.toString());
 
-        // Menggunakan Navigator.pushNamedAndRemoveUntil untuk mengganti halaman
+        // Debugging nilai yang disimpan
+        print('Role: $role, User ID: $userId');
+
+        // Navigasi berdasarkan role
         if (role == 2) {
-          // Role sebagai integer
           Navigator.pushNamedAndRemoveUntil(
             context,
-            '/homeGuru', // Nama rute untuk halaman HomeGuru
-            (route) => false, // Menghapus semua riwayat halaman sebelumnya
+            '/homeGuru',
+            (route) => false,
           );
         } else if (role == 3) {
-          // Role sebagai integer
           Navigator.pushNamedAndRemoveUntil(
             context,
-            '/homeSiswa', // Nama rute untuk halaman HomeSiswa
-            (route) => false, // Menghapus semua riwayat halaman sebelumnya
+            '/homeSiswa',
+            (route) => false,
           );
         } else {
           setState(() {
