@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Tambahkan import ini untuk image_picker
-import 'dart:io'; // Untuk menangani file
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'add_materi.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,14 +31,11 @@ class TambahMateriPage extends StatefulWidget {
 class _TambahMateriPageState extends State<TambahMateriPage> {
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _subBabController = TextEditingController();
-  File? _imageFile; // Untuk menyimpan file gambar yang dipilih
+  File? _imageFile;
 
-  // Fungsi untuk memilih gambar menggunakan ImagePicker
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
-
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -46,11 +44,10 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
   }
 
   void _goToNextPage() {
-    // Implementasi navigasi ke halaman berikutnya
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const Scaffold(body: Center(child: Text('Halaman Selanjutnya'))),
+        builder: (context) => const MateriContentPage(),
       ),
     );
   }

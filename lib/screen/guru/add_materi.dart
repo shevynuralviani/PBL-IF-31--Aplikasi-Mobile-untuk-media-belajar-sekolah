@@ -1,22 +1,6 @@
-import 'dart:io'; 
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; 
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const MateriContentPage(),
-    );
-  }
-}
+import 'package:image_picker/image_picker.dart';
 
 class MateriContentPage extends StatelessWidget {
   const MateriContentPage({super.key});
@@ -69,10 +53,12 @@ class NoteBody extends StatefulWidget {
 }
 
 class _NoteBodyState extends State<NoteBody> {
+  final TextEditingController _textController = TextEditingController();
   TextAlign _textAlign = TextAlign.left;
   bool _isBold = false;
   bool _isUnderline = false;
   bool _isItalic = false;
+  bool _isUndoActive = false;
   List<String> _imagePaths = [];
 
   void _changeTextAlign(TextAlign align) {
@@ -99,13 +85,20 @@ class _NoteBodyState extends State<NoteBody> {
     });
   }
 
+  void _clearText() {
+    setState(() {
+      _textController.clear();
+      _isUndoActive = false;
+    });
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
-        _imagePaths.add(pickedFile.path); // Menambahkan gambar ke list
+        _imagePaths.add(pickedFile.path);
       });
     }
   }
@@ -123,16 +116,18 @@ class _NoteBodyState extends State<NoteBody> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   for (String imagePath in _imagePaths) ...[
-                    Image.file(File(imagePath)), // Menampilkan gambar
+                    Image.file(File(imagePath)),
                     const SizedBox(height: 8),
                   ],
                   TextField(
+                    controller: _textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     textAlign: _textAlign,
                     style: TextStyle(
                       fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-                      fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
+                      fontStyle:
+                          _isItalic ? FontStyle.italic : FontStyle.normal,
                       decoration: _isUnderline
                           ? TextDecoration.underline
                           : TextDecoration.none,
@@ -142,6 +137,11 @@ class _NoteBodyState extends State<NoteBody> {
                       hintStyle: TextStyle(color: Colors.grey),
                       border: InputBorder.none,
                     ),
+                    onChanged: (text) {
+                      setState(() {
+                        _isUndoActive = text.isNotEmpty;
+                      });
+                    },
                   ),
                 ],
               ),
@@ -160,6 +160,8 @@ class _NoteBodyState extends State<NoteBody> {
             onUnderlineToggle: _toggleUnderline,
             onItalicToggle: _toggleItalic,
             onImagePick: _pickImage,
+            onUndo: _clearText,
+            isUndoActive: _isUndoActive,
           ),
         ),
       ],
@@ -173,6 +175,8 @@ class BottomBar extends StatelessWidget {
   final VoidCallback onUnderlineToggle;
   final VoidCallback onItalicToggle;
   final VoidCallback onImagePick;
+  final VoidCallback onUndo;
+  final bool isUndoActive;
 
   const BottomBar({
     super.key,
@@ -181,6 +185,8 @@ class BottomBar extends StatelessWidget {
     required this.onUnderlineToggle,
     required this.onItalicToggle,
     required this.onImagePick,
+    required this.onUndo,
+    required this.isUndoActive,
   });
 
   @override
@@ -260,12 +266,13 @@ class BottomBar extends StatelessWidget {
             ],
           ),
           IconButton(
-            onPressed: null,
-            icon: const Icon(Icons.undo, color: Colors.grey), // Undo dengan warna abu-abu
+            onPressed: isUndoActive ? onUndo : null,
+            icon: Icon(Icons.undo,
+                color: isUndoActive ? Colors.lightGreen : Colors.grey),
           ),
           IconButton(
-            onPressed: onImagePick, // Fungsi untuk memilih gambar
-            icon: const Icon(Icons.image, color: Colors.lightGreen), // Icon gambar
+            onPressed: onImagePick,
+            icon: const Icon(Icons.image, color: Colors.lightGreen),
           ),
         ],
       ),
