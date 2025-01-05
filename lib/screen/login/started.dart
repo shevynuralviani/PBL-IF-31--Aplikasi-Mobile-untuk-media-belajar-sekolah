@@ -27,7 +27,7 @@ class StartedScreen extends StatelessWidget {
               ),
               SizedBox(height: 15),
               Text(
-                'Reading everywhere and anywhere with this app',
+                'Reading everywhere and anytime with this app',
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 30),
