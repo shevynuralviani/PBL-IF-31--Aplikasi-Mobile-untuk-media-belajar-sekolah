@@ -22,8 +22,9 @@ class _VideoPageState extends State<VideoPage> {
   // Fungsi untuk mengambil data video dari API
   Future<void> _fetchVideos() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2/api/video_api.php'));
+      final response = await http.get(Uri.parse(
+        'https://lightblue-moose-868535.hostingersite.com/api/video_api.php',
+      ));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);

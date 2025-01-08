@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:genetika_app/screen/guru/guru_homepage.dart';
-import 'package:genetika_app/screen/siswa/siswa_homepage.dart';
-import 'package:genetika_app/screen/password/forget_password.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -15,17 +12,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String errorMessage = '';
-  bool isUsernameValid = true;
-  bool isPasswordValid = true;
   bool _isPasswordVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus(); // Memeriksa status login saat aplikasi dimulai
+    _checkLoginStatus();
   }
 
-  // Cek apakah sudah login sebelumnya
   void _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -34,16 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       if (role == '2') {
         Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/homeGuru',
-          (route) => false,
-        );
+            context, '/homeGuru', (route) => false);
       } else if (role == '3') {
         Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/homeSiswa',
-          (route) => false,
-        );
+            context, '/homeSiswa', (route) => false);
       }
     }
   }
@@ -56,84 +44,57 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2/api/loginuser.php'),
-      body: {
-        'username': _usernameController.text,
-        'password': _passwordController.text,
-      },
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'https://lightblue-moose-868535.hostingersite.com/api/loginuser.php'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'username': _usernameController.text.trim(),
+          'password': _passwordController.text.trim(),
+        }),
+      );
 
-    // Periksa respons dari server
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      print('Respons API: $data'); // Debugging respons dari server
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-      if (data['status'] == 'success') {
-        final role = data['role']; // Ambil role dari respons
-        final userId = data['user_id']; // Ambil user_id dari respons
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-        setState(() {
-          errorMessage = ''; // Reset error message jika login berhasil
-        });
+        if (data['status'] == 'success') {
+          final role = data['role'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('role', role.toString());
 
-        // Simpan status login, role, dan currentUserId ke SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isLoggedIn', true);
-        await prefs.setString('role', role.toString());
-        await prefs.setString('currentUserId', userId.toString());
-
-        // Debugging nilai yang disimpan
-        print('Role: $role, User ID: $userId');
-
-        // Navigasi berdasarkan role
-        if (role == 2) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/homeGuru',
-            (route) => false,
-          );
-        } else if (role == 3) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/homeSiswa',
-            (route) => false,
-          );
+          if (role == 2) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/homeGuru', (route) => false);
+          } else if (role == 3) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/homeSiswa', (route) => false);
+          } else {
+            setState(() {
+              errorMessage = 'Akses ditolak untuk role Anda';
+            });
+          }
         } else {
           setState(() {
-            errorMessage = 'Access denied for your role'; // Role tidak valid
+            errorMessage = data['message'] ?? 'Login gagal, coba lagi.';
           });
         }
       } else {
         setState(() {
-          errorMessage = data['message']; // Tampilkan pesan error
+          errorMessage = 'Kesalahan server, coba lagi nanti.';
         });
       }
-    } else {
+    } catch (e) {
       setState(() {
-        errorMessage = 'Server error, please try again later'; // Error server
+        errorMessage = 'Terjadi kesalahan: $e';
       });
     }
-  }
-
-  InputDecoration _inputDecoration(String labelText, bool isValid) {
-    return InputDecoration(
-      labelText: labelText,
-      labelStyle: TextStyle(color: Colors.black),
-      enabledBorder: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: isValid ? Colors.black : Colors.red, width: 1.5),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: isValid ? Colors.green : Colors.red, width: 2.0),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
   }
 
   @override
@@ -165,15 +126,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 18),
                   TextField(
                     controller: _usernameController,
-                    decoration: _inputDecoration('Username ', isUsernameValid),
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: TextStyle(color: Colors.black),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green, width: 2.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     style: TextStyle(color: Colors.black),
                   ),
                   SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
-                    decoration:
-                        _inputDecoration('Password', isPasswordValid).copyWith(
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: Colors.black),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green, width: 2.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
@@ -200,24 +181,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        isUsernameValid = _usernameController.text.isNotEmpty;
-                        isPasswordValid = _passwordController.text.isNotEmpty;
-
-                        if (!isUsernameValid) {
-                          errorMessage = 'Username cannot be empty';
-                        } else if (!isPasswordValid) {
-                          errorMessage = 'Password cannot be empty';
+                        if (_usernameController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          errorMessage = 'Username dan password harus diisi';
                         } else {
                           errorMessage = '';
-                          login(); // Panggil login jika valid
+                          login();
                         }
                       });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF7DBD07),
                       padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                      foregroundColor: Colors.black,
+                          EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text('Login'),
                   ),
@@ -229,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushNamed(context, '/forgetpassword');
                       },
                       child: Text(
-                        'Forgotten your password?',
+                        'Lupa password Anda?',
                         style: TextStyle(
                           color: Color(0xFF7DBD07),
                           decoration: TextDecoration.none,
@@ -237,7 +216,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 50),
                 ],
               ),
             ),

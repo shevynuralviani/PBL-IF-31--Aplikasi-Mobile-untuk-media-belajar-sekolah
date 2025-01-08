@@ -40,8 +40,9 @@ class _MateriPageState extends State<MateriPage> {
   // Fetch Materi data from the API
   Future<void> fetchMateri() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2/api/get_materi.php'));
+      final response = await http.get(Uri.parse(
+        'https://lightblue-moose-868535.hostingersite.com/api/get_materi.php',
+      ));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -91,7 +92,9 @@ class _MateriPageState extends State<MateriPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2/api/update_progressmateri.php'),
+      Uri.parse(
+        'https://lightblue-moose-868535.hostingersite.com/api/update_progressmateri.php',
+      ),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'user_id': currentUserId, // ID pengguna
@@ -160,8 +163,10 @@ class _MateriPageState extends State<MateriPage> {
                         trailing: IconButton(
                           icon: Icon(
                             materi.isFavorite ? Icons.star : Icons.star_border,
-                            color:
-                                materi.isFavorite ? Colors.yellow : Colors.grey,
+                            color: materi.isFavorite
+                                ? Colors.green
+                                : Colors
+                                    .grey, // Ganti warna bintang menjadi hijau
                           ),
                           onPressed: () => _toggleFavorite(materi),
                         ),

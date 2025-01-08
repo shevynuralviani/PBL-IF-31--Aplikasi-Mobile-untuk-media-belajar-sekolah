@@ -24,7 +24,8 @@ class _MaterialDetailPageState extends State<MaterialDetailPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2/api/update_progressmateri.php'),
+      Uri.parse(
+          'http://www.bekend.infinityfreeapp.com/update_progressmateri.php'),
       body: {
         'user_id': 'user_id_here', // Ganti dengan ID pengguna yang sesuai
         'materi_id': materi.id.toString(),
