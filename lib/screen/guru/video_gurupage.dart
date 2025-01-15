@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Video {
   final String id;
@@ -16,29 +18,64 @@ class VideoListPage extends StatefulWidget {
 class _VideoListPageState extends State<VideoListPage> {
   final List<Video> _videos = [];
 
-  void _deleteVideo(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Konfirmasi'),
-        content: Text('Apakah Anda yakin ingin menghapus video ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _videos.removeAt(index);
-              });
-              Navigator.pop(context);
-            },
-            child: Text('Ya'),
-          ),
-        ],
-      ),
+  @override
+  void initState() {
+    super.initState();
+    _fetchVideos();
+  }
+
+  // Fetch video data from the API
+  void _fetchVideos() async {
+    final response = await http.get(Uri.parse(
+        'https://lightblue-moose-868535.hostingersite.com/api/get_video_guru.php')); // Ganti dengan URL API Anda
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _videos.clear();
+        _videos.addAll(data.map((videoData) {
+          return Video(
+            id: videoData['id'],
+            title: videoData['title'],
+          );
+        }).toList());
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memuat video')),
+      );
+    }
+  }
+
+  void _deleteVideo(int index) async {
+    final videoId = _videos[index].id;
+
+    final response = await http.post(
+      Uri.parse(
+          'https://lightblue-moose-868535.hostingersite.com/api/delete_video_guru.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'id': videoId}),
     );
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      if (result['status'] == 'success') {
+        setState(() {
+          _videos.removeAt(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Video berhasil dihapus')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal menghapus video')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal menghapus video')),
+      );
+    }
   }
 
   void _editVideo(int index) {
@@ -52,6 +89,7 @@ class _VideoListPageState extends State<VideoListPage> {
               _videos[index] = updatedVideo;
             });
           },
+          initialId: video.id,
           initialTitle: video.title,
           initialUrl: 'https://www.youtube.com/watch?v=${video.id}',
         ),
@@ -72,68 +110,41 @@ class _VideoListPageState extends State<VideoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daftar Video'),
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: const Text('Daftar Video'),
+        backgroundColor: Colors.green,
       ),
-      body: Container(
-        color: Colors.white,
-        child: _videos.isEmpty
-            ? Center(child: Text("Belum ada video"))
-            : ListView.builder(
-                itemCount: _videos.length,
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.video_library),
-                      title: Text(_videos[index].title),
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'Hapus') {
-                            _deleteVideo(index);
-                          } else if (value == 'Edit') {
-                            _editVideo(index);
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'Edit',
-                            child: Text('Edit'),
-                          ),
-                          PopupMenuItem(
-                            value: 'Hapus',
-                            child: Text('Hapus'),
-                          ),
-                        ],
-                        icon: Icon(Icons.more_vert),
+      body: _videos.isEmpty
+          ? const Center(child: Text("Belum ada video"))
+          : ListView.builder(
+              itemCount: _videos.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(_videos[index].title),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'Hapus') {
+                        _deleteVideo(index);
+                      } else if (value == 'Edit') {
+                        _editVideo(index);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'Edit',
+                        child: Text('Edit'),
                       ),
-                      onTap: () => _playVideo(_videos[index].id),
-                    ),
-                  );
-                },
-              ),
-      ),
+                      const PopupMenuItem(
+                        value: 'Hapus',
+                        child: Text('Hapus'),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _playVideo(_videos[index].id),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(
@@ -153,10 +164,15 @@ class _VideoListPageState extends State<VideoListPage> {
 
 class AddVideoPage extends StatefulWidget {
   final Function(Video) onAdd;
+  final String? initialId;
   final String? initialUrl;
   final String? initialTitle;
 
-  AddVideoPage({required this.onAdd, this.initialUrl, this.initialTitle});
+  AddVideoPage(
+      {required this.onAdd,
+      this.initialId,
+      this.initialUrl,
+      this.initialTitle});
 
   @override
   _AddVideoPageState createState() => _AddVideoPageState();
@@ -177,17 +193,44 @@ class _AddVideoPageState extends State<AddVideoPage> {
     }
   }
 
-  void _saveVideo() {
+  void _saveVideo() async {
     final url = _urlController.text.trim();
     final videoId = YoutubePlayer.convertUrlToId(url);
     final title = _titleController.text.trim();
 
     if (videoId != null && title.isNotEmpty) {
-      widget.onAdd(Video(id: videoId, title: title));
-      Navigator.pop(context);
+      final response = await http.post(
+        Uri.parse(
+            'https://lightblue-moose-868535.hostingersite.com/api/${widget.initialId == null ? "post_video_guru.php" : "update_video_guru.php"}'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'id': widget.initialId,
+          'title': title,
+          'video_url': url,
+          'category': 'General',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['message'] == 'Video updated successfully' ||
+            result['message'] == 'Video added successfully') {
+          widget.onAdd(Video(id: videoId, title: title));
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal menyimpan video')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal menyimpan video')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Masukkan URL YouTube dan judul yang valid.')),
+        const SnackBar(
+            content: Text('Masukkan URL YouTube dan judul yang valid')),
       );
     }
   }
@@ -195,10 +238,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tambah/Edit Video'),
-        backgroundColor: Colors.grey[200],
-      ),
+      appBar: AppBar(title: const Text('Tambah/Edit Video')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -206,41 +246,23 @@ class _AddVideoPageState extends State<AddVideoPage> {
           children: [
             TextField(
               controller: _urlController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Masukkan URL YouTube',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.all(8),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Masukkan Judul Video',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.all(8),
               ),
             ),
-            SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-            child: ElevatedButton(
+            const SizedBox(height: 20),
+            ElevatedButton(
               onPressed: _saveVideo,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              ),
-              child: const Text(
-                'Unggah',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+              child: const Text('Simpan'),
             ),
           ],
         ),
@@ -258,21 +280,12 @@ class VideoPlayerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final YoutubePlayerController _youtubeController = YoutubePlayerController(
       initialVideoId: videoId,
-      flags: YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-      ),
+      flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Putar Video'),
-        backgroundColor: Colors.green,
-      ),
-      body: YoutubePlayer(
-        controller: _youtubeController,
-        showVideoProgressIndicator: true,
-      ),
+      appBar: AppBar(title: const Text('Putar Video')),
+      body: YoutubePlayer(controller: _youtubeController),
     );
   }
 }

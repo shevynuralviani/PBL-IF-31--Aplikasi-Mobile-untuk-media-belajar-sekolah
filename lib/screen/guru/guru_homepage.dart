@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:genetika_app/screen/guru/materi_guru.dart';
-import 'package:genetika_app/screen/guru/vidio.dart';
+import 'package:genetika_app/screen/guru/video_gurupage.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:genetika_app/screen/navbar/custom_appbar.dart';
 import 'package:genetika_app/screen/navbar/bottom_bar_guru.dart';

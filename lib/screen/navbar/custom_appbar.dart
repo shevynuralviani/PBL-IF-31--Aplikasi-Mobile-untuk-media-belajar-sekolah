@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:genetika_app/screen/password/change_password.dart';
 import 'package:genetika_app/screen/login/login.dart';
+import 'dart:convert';
 
 void main() {
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-  );
   runApp(const MyApp());
 }
 
@@ -41,7 +39,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MyCustomAppBar(),
-      body: FutureBuilder(
+      body: FutureBuilder<Map<String, String>>(
         future: _getUserInfo(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,7 +47,7 @@ class HomePage extends StatelessWidget {
           }
 
           if (snapshot.hasData) {
-            Map<String, String> userInfo = snapshot.data as Map<String, String>;
+            Map<String, String> userInfo = snapshot.data!;
             return ListView(
               padding: EdgeInsets.zero,
               children: [

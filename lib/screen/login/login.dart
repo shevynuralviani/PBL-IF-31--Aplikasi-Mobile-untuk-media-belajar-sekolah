@@ -48,17 +48,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await http.post(
         Uri.parse(
             'https://lightblue-moose-868535.hostingersite.com/api/loginuser.php'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': _usernameController.text.trim(),
           'password': _passwordController.text.trim(),
         }),
       );
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -179,17 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_usernameController.text.isEmpty ||
-                            _passwordController.text.isEmpty) {
-                          errorMessage = 'Username dan password harus diisi';
-                        } else {
-                          errorMessage = '';
-                          login();
-                        }
-                      });
-                    },
+                    onPressed: login,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF7DBD07),
                       padding:
